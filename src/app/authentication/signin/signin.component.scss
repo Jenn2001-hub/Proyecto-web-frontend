@@ -1,13 +1,14 @@
-
+/* Estilos para la imagen de fondo en la sección izquierda */
 .left-img {
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 100%;
-    background-color: white;
-    height: 100%;
-    margin-left: 80px;
+    background-size: contain;    /* La imagen se ajusta manteniendo su proporción */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    width: 100%;               /* Ocupa el 100% del ancho del contenedor */
+    background-color: white;    /* Fondo blanco por defecto */
+    height: 100%;              /* Ocupa el 100% de la altura del contenedor */
+    margin-left: 80px;         /* Margen izquierdo para separación del borde */
 }
 
+/* Estilos para el contenedor principal de autenticación */
 .auth-container {
-    background-color: white;
+    background-color: white;   /* Fondo blanco para todo el contenedor */
 }

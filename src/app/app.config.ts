@@ -1,3 +1,4 @@
+// Importa proveedores y módulos necesarios de Angular
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
@@ -16,31 +17,51 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { JwtInterceptor } from '@core/interceptor/jwt.interceptor';
 
+// Objeto de configuración principal de la aplicación
 export const appConfig: ApplicationConfig = {
   providers: [
+    // Proveedor básico para el cliente HTTP
     provideHttpClient(),
+    
+    // Configuración del router con las rutas definidas
     provideRouter(APP_ROUTE),
+    
+    // Soporte para animaciones del navegador
     provideAnimations(),
+    
+    // Usa PathLocationStrategy (rutas HTML5) en lugar de HashLocationStrategy
     { provide: LocationStrategy, useClass: PathLocationStrategy },
+    
+    // Configuración para manejo de fechas en Angular Material
     { provide: DateAdapter, useClass: MomentDateAdapter },
     {
       provide: MAT_DATE_FORMATS,
       useValue: {
         parse: {
-          dateInput: 'YYYY-MM-DD',
+          dateInput: 'YYYY-MM-DD', // Formato de entrada para fechas
         },
         display: {
-          dateInput: 'YYYY-MM-DD',
-          monthYearLabel: 'YYYY MMM',
-          dateA11yLabel: 'LL',
-          monthYearA11yLabel: 'YYYY MMM',
+          dateInput: 'YYYY-MM-DD', // Formato de visualización de fechas
+          monthYearLabel: 'YYYY MMM', // Formato para etiquetas de mes/año
+          dateA11yLabel: 'LL', // Formato accesible para fechas
+          monthYearA11yLabel: 'YYYY MMM', // Formato accesible para mes/año
         },
       },
     },
+    
+    // Interceptor JWT para autenticación
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    
+    // Módulo de iconos Feather con todos los iconos
     importProvidersFrom(FeatherModule.pick(allIcons)),
+    
+    // Configuración de Chart.js con registros por defecto
     provideCharts(withDefaultRegisterables()),
+    
+    // Configuración adicional para el cliente HTTP
     provideHttpClient(withInterceptorsFromDi()),
+    
+    // Soporte para animaciones asíncronas
     provideAnimationsAsync(),
   ],
 };

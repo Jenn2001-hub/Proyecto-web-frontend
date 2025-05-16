@@ -1,5 +1,7 @@
-import { ROLES } from '@shared/models/enums';
+import { ROLES } from '@core/models/enums';
 import { RouteInfo } from './sidebar.metadata';
+
+// Configuración de rutas del menú lateral
 export const ROUTES: RouteInfo[] = [
   {
     path: '/dashboard/main',
@@ -11,7 +13,7 @@ export const ROUTES: RouteInfo[] = [
     badge: '',
     badgeClass: '',
     submenu: [],
-    rolAuthority: [ROLES.ADMIN, ROLES.USER]
+    rolAuthority: [ROLES.ADMIN, ROLES.USER] // Accesible para ambos roles
   },
   {
     path: '/page/projects',
@@ -23,7 +25,7 @@ export const ROUTES: RouteInfo[] = [
     badge: '',
     badgeClass: '',
     submenu: [],
-    rolAuthority: [ROLES.ADMIN]
+    rolAuthority: [ROLES.ADMIN] // Solo admin
   },  
   {
     path: '/page/users',
@@ -35,7 +37,7 @@ export const ROUTES: RouteInfo[] = [
     badge: '',
     badgeClass: '',
     submenu: [],
-    rolAuthority: [ROLES.ADMIN]
+    rolAuthority: [ROLES.ADMIN] // Solo admin
   },
   {
     path: '/page/projects',
@@ -47,6 +49,6 @@ export const ROUTES: RouteInfo[] = [
     badge: '',
     badgeClass: '',
     submenu: [],
-    rolAuthority: [ROLES.USER]
+    rolAuthority: [ROLES.USER] // Solo usuario normal
   },  
 ];

@@ -12,10 +12,9 @@ import {
   OnInit,
   Renderer2,
   HostListener,
-  OnDestroy,
 } from '@angular/core';
-// import { ROUTES } from './sidebar-items';
-// import { AuthService } from '@core';
+import { ROUTES } from './sidebar-items';
+import { AuthService } from '@core';
 import { RouteInfo } from './sidebar.metadata';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,46 +36,39 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     NgClass,
   ],
 })
-export class SidebarComponent
-  extends UnsubscribeOnDestroyAdapter
-  implements OnInit, OnDestroy
-{
-  public sidebarItems!: RouteInfo[];
-  public innerHeight?: number;
-  public bodyTag!: HTMLElement;
-  listMaxHeight?: string;
-  listMaxWidth?: string;
-  userFullName?: string;
-  userImg?: string;
-  userType?: string;
-  headerHeight = 60;
-  currentRoute?: string;
+export class SidebarComponent extends UnsubscribeOnDestroyAdapter implements OnInit {
+  public sidebarItems!: RouteInfo[]; // Items del menú filtrados por rol
+  public innerHeight?: number; // Altura de la ventana
+  public bodyTag!: HTMLElement; // Referencia al body
+  listMaxHeight?: string; // Altura máxima de la lista
+  listMaxWidth?: string; // Ancho máximo de la lista
+  userLogged: string | undefined = ''; // Nombre del usuario
 
-  userLogged: string | undefined = '';
-  
   constructor(
     @Inject(DOCUMENT) private readonly _document: Document,
     private readonly _renderer: Renderer2,
     public readonly _elementRef: ElementRef,
-    // private readonly _authService: AuthService,
+    private readonly _authService: AuthService,
     private readonly _router: Router,
     private readonly _domSanitizer: DomSanitizer
   ) {
     super();
+    // Cierra el sidebar al navegar (en móviles)
     this.subs.sink = this._router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        // close sidebar on mobile screen after menu select
         this._renderer.removeClass(this._document.body, 'overlay-open');
       }
     });
-    // const roleInfo = this._authService.getRoleInfoByToken();
-    // this.userLogged = roleInfo ? roleInfo.roleName : undefined;
   }
+
+  // Maneja el redimensionamiento de la ventana
   @HostListener('window:resize', ['$event'])
   windowResizecall() {
     this.setMenuHeight();
     this.checkStatuForResize(false);
   }
+
+  // Cierra el sidebar al hacer click fuera
   @HostListener('document:mousedown', ['$event'])
   onGlobalClick(event: Event): void {
     if (!this._elementRef.nativeElement.contains(event.target)) {
@@ -84,62 +76,49 @@ export class SidebarComponent
     }
   }
 
+  // Alternar menús desplegables
   callToggleMenu(event: Event, length: number): void {
     if (!this.isValidLength(length) || !this.isValidEvent(event)) {
       return;
     }
 
     const parentElement = (event.target as HTMLElement).closest('li');
-    if (!parentElement) {
-      return;
-    }
+    if (!parentElement) return;
 
     const activeClass = parentElement.classList.contains('active');
-
-    if (activeClass) {
-      this._renderer.removeClass(parentElement, 'active');
-    } else {
-      this._renderer.addClass(parentElement, 'active');
-    }
+    activeClass 
+      ? this._renderer.removeClass(parentElement, 'active')
+      : this._renderer.addClass(parentElement, 'active');
   }
 
-  private isValidLength(length: number): boolean {
-    return length > 0;
-  }
-
-  private isValidEvent(event: Event): boolean {
-    return event && event.target instanceof HTMLElement;
-  }
-
+  // Sanitiza HTML para prevenir XSS
   sanitizeHtml(html: string): SafeHtml {
     return this._domSanitizer.bypassSecurityTrustHtml(html);
   }
 
   ngOnInit() {
-    // const rolAuthority = this._authService.getAuthFromSessionStorage().rol_id;
-    // this.sidebarItems = ROUTES.filter((sidebarItem) => sidebarItem?.rolAuthority.includes(rolAuthority));
-    // this.initLeftSidebar();
-    // this.bodyTag = this._document.body;
+    // Filtra rutas por rol del usuario
+    const rolAuthority = this._authService.getAuthFromSessionStorage().rol_id;
+    this.sidebarItems = ROUTES.filter(item => item?.rolAuthority.includes(rolAuthority));
+    this.initLeftSidebar();
+    this.bodyTag = this._document.body;
   }
 
-
+  // Inicializa el sidebar
   initLeftSidebar() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const _this = this;
-    // Set menu height
-    _this.setMenuHeight();
-    _this.checkStatuForResize(true);
+    this.setMenuHeight();
+    this.checkStatuForResize(true);
   }
+
+  // Calcula altura del menú
   setMenuHeight() {
     this.innerHeight = window.innerHeight;
-    const height = this.innerHeight - this.headerHeight;
+    const height = this.innerHeight - 60; // Resta altura del header
     this.listMaxHeight = height + '';
     this.listMaxWidth = '500px';
   }
-  isOpen() {
-    return this.bodyTag.classList.contains('overlay-open');
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+  // Verifica estado responsive
   checkStatuForResize(firstTime: boolean) {
     if (window.innerWidth < 1025) {
       this._renderer.addClass(this._document.body, 'ls-closed');
@@ -147,6 +126,8 @@ export class SidebarComponent
       this._renderer.removeClass(this._document.body, 'ls-closed');
     }
   }
+
+  // Efectos hover
   mouseHover() {
     const body = this._elementRef.nativeElement.closest('body');
     if (body.classList.contains('submenu-closed')) {
@@ -154,11 +135,21 @@ export class SidebarComponent
       this._renderer.removeClass(this._document.body, 'submenu-closed');
     }
   }
+
   mouseOut() {
     const body = this._elementRef.nativeElement.closest('body');
     if (body.classList.contains('side-closed-hover')) {
       this._renderer.removeClass(this._document.body, 'side-closed-hover');
       this._renderer.addClass(this._document.body, 'submenu-closed');
     }
+  }
+
+  // Helpers de validación
+  private isValidLength(length: number): boolean {
+    return length > 0;
+  }
+
+  private isValidEvent(event: Event): boolean {
+    return event && event.target instanceof HTMLElement;
   }
 }

@@ -1,94 +1,140 @@
+// Importaciones básicas de Angular
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+// Importaciones para formularios reactivos
+import { 
+  UntypedFormBuilder, // Constructor de formularios (sin tipo específico)
+  UntypedFormGroup,   // Grupo de controles de formulario (sin tipo específico)
+  Validators,         // Validadores predefinidos
+  FormsModule,        // Para formularios template-driven
+  ReactiveFormsModule // Para formularios reactivos
+} from '@angular/forms';
+
+// Importación del servicio de autenticación personalizado
 import { AuthService } from '@core';
+
+// Importaciones de Angular Material para UI
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+
+// Importación de SweetAlert2 para notificaciones bonitas
 import Swal from 'sweetalert2';
 
+// Decorador @Component que define la configuración del componente
 @Component({
-  selector: 'app-signin',
-  templateUrl: './signin.component.html',
-  styleUrls: ['./signin.component.scss'],
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
+  selector: 'app-signin', // Selector para usar en templates
+  templateUrl: './signin.component.html', // Ruta al template HTML
+  styleUrls: ['./signin.component.scss'], // Ruta a los estilos SCSS
+  standalone: true, // Indica que es un componente standalone (Angular 14+)
+  imports: [ // Módulos importados directamente
+    FormsModule, // Para soporte de formularios template-driven
+    ReactiveFormsModule, // Para formularios reactivos
+    MatFormFieldModule, // Para campos de formulario de Material
+    MatInputModule, // Para inputs de Material
+    MatIconModule, // Para íconos de Material
+    MatButtonModule, // Para botones de Material
   ],
-  standalone: true,
 })
 export class SigninComponent implements OnInit {
+  // Grupo de formulario para autenticación
   authForm!: UntypedFormGroup;
-  submitted = false;
-  loading = false;
-  returnUrl!: string;
-  error = '';
-  hide = true;
+  
+  // Estado del formulario
+  submitted = false; // Indica si se ha enviado el formulario
+  loading = false; // Indica si está en proceso de carga
+  error = ''; // Mensaje de error
+  hide = true; // Controla la visibilidad de la contraseña
 
+  // Variables para credenciales (¿redundantes con el formulario?)
   email = '';
   password = '';
 
+  // Constructor con inyección de dependencias
   constructor(
-    private readonly formBuilder: UntypedFormBuilder,
-    private readonly router: Router,
-    private readonly authService: AuthService,
+    private readonly formBuilder: UntypedFormBuilder, // Para construir formularios
+    private readonly router: Router, // Para navegación
+    private readonly authService: AuthService, // Servicio de autenticación
   ) { }
 
+  /**
+   * Inicialización del componente
+   * Configura el formulario reactivo con validaciones
+   */
   ngOnInit() {
     this.authForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
+      username: ['', Validators.required], // Campo requerido
+      password: ['', Validators.required], // Campo requerido
     });
   }
+
+  /**
+   * Getter para acceder fácilmente a los controles del formulario
+   * @returns Los controles del formulario
+   */
   get f() {
     return this.authForm.controls;
   }
 
+  /**
+   * Maneja el envío del formulario de inicio de sesión
+   */
   onSubmit() {
-    this.submitted = true;
-    this.error = '';
-  
+    this.submitted = true; // Marca el formulario como enviado
+    this.error = ''; // Reinicia los mensajes de error
+
+    // Valida el formulario
     if (this.authForm.invalid) {
       Swal.fire('Error', 'Usuario y contraseña no válidos.', 'error');
       return;
     }
-  
+
+    // Llama al servicio de autenticación
     this.authService
-      .login(this.authForm.get('username')?.value, this.authForm.get('password')?.value)
+      .login(
+        this.authForm.get('username')?.value, 
+        this.authForm.get('password')?.value
+      )
       .subscribe({
         next: (res) => {
+          // Manejo de respuesta exitosa
           if (res?.token) {
-            // Guardar el token
+            // Almacena el token en sessionStorage
             sessionStorage.setItem('accessToken', res.token);
-  
-            // Mostrar en consola para depuración
             console.log('Token recibido:', res.token);
-  
-            // Actualizar el usuario en AuthService
+            
+            // Establece el token en el servicio de autenticación
             this.authService.setToken(res.token);
-  
+
+            // Muestra notificación de éxito
             Swal.fire({
               title: 'Inicio de sesión exitoso',
               text: 'Redirigiendo al dashboard...',
               icon: 'success',
-              timer: 2000,
-              showConfirmButton: false
+              timer: 2000, // Cierra automáticamente después de 2 segundos
+              showConfirmButton: false // Oculta el botón de confirmación
             }).then(() => {
+              // Redirige al dashboard después de cerrar la notificación
               this.router.navigate(['/dashboard/main']);
             });
           } else {
+            // Credenciales incorrectas
             Swal.fire('Error', 'Credenciales incorrectas.', 'error');
           }
         },
         error: (error) => {
+          // Manejo de errores
           this.submitted = false;
           this.loading = false;
-          Swal.fire('Error en el inicio de sesión', error.error?.message || 'Error desconocido', 'error');
+          
+          // Muestra el mensaje de error del servidor o uno genérico
+          Swal.fire(
+            'Error en el inicio de sesión', 
+            error.error?.message || 'Error desconocido', 
+            'error'
+          );
         }
       });
   }

@@ -3,20 +3,28 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import { AuthService } from '../service/auth.service';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class AuthGuard  {
-  constructor(private readonly authService: AuthService) {}
+// Guard de autenticación para rutas protegidas
+@Injectable({ providedIn: 'root' })
+export class AuthGuard {
+  
+  constructor(
+    private readonly authService: AuthService  // Servicio de autenticación
+  ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+  // Método que determina si el usuario puede acceder
+  canActivate(
+    route: ActivatedRouteSnapshot,  // Ruta actual
+    state: RouterStateSnapshot     // Estado del router
+  ): boolean {
+    
+    // Verifica si el usuario está autenticado
     const currentUser = this.authService.isAuthenticated();
-    if (currentUser) {
-      return true;
-    }
-
-    // // not logged in so redirect to login page with the return url
-    this.authService.logout();
-    return false;
+    
+    // Si está autenticado, permite el acceso
+    if (currentUser) return true;
+    
+    // Si no está autenticado:
+    this.authService.logout();      // Limpia la sesión
+    return false;                  // Deniega el acceso
   }
 }

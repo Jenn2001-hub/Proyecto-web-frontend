@@ -1,10 +1,8 @@
+// Re-exporta el módulo para facilitar imports
 export * from './core.module';
 
-// services
+// Exportaciones de servicios
 export { AuthService } from './service/auth.service';
 
-
-// models
-
-// export { User } from './models/user';
+// Exportaciones de modelos/interfaces
 export { InConfiguration } from './models/config.interface';
