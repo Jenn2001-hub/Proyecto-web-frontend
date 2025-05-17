@@ -6,4 +6,5 @@ export class User {
     firsName!: string;    // Nombre (typo: debería ser firstName)
     lastName!: string;   // Apellido
     token!: string;      // Token de autenticación JWT
+    administradorId!: number; //identificador de administrador
 }

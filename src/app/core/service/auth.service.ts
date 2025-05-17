@@ -42,7 +42,7 @@ export class AuthService {
    * @returns Observable con la respuesta del servidor
    */
   login(email: string, password: string): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/api/auth/login`;
+    const endpoint = `${this.urlBaseServices}/auth/login`;
     return this.http.post<any>(endpoint, { email, password });
   }
 

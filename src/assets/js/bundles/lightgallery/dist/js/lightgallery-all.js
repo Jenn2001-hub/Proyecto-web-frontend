@@ -2004,7 +2004,7 @@
                 var vimeoVideoId = $this.attr('data-vimeo-id');
 
                 if (vimeoVideoId) {
-                    $.getJSON('//www.vimeo.com/api/v2/video/' + vimeoVideoId + '.json?callback=?', {
+                    $.getJSON('//www.vimeo.com/video/' + vimeoVideoId + '.json?callback=?', {
                         format: 'json'
                     }, function (data) {
                         $this.find('img').attr('src', data[0][_this.core.s.vimeoThumbSize]);
