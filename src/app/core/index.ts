@@ -5,4 +5,5 @@ export * from './core.module';
 export { AuthService } from './service/auth.service';
 
 // Exportaciones de modelos/interfaces
+export { User } from './models/user';
 export { InConfiguration } from './models/config.interface';

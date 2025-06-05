@@ -4,14 +4,6 @@ import { AuthGuard } from './guard/auth.guard';
 import { AuthService } from './service/auth.service';
 import { AdminGuard } from './guard/admin.guard';
 
-/**
- * Módulo central que agrupa funcionalidades esenciales de la aplicación
- * 
- * Provee:
- * - Servicios centrales (AuthService)
- * - Guards de ruta (AuthGuard, AdminGuard)
- * - Componentes base
- */
 @NgModule({
   declarations: [], // No declara componentes en este caso
   imports: [CommonModule], // Importa módulos comunes de Angular

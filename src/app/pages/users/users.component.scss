@@ -1,3 +1,30 @@
+/* src/app/pages/users/users.component.scss */
+.users-container {
+    margin-top: 40px;
+    margin-left: 70px;
+}
+
+.content-block {
+    padding: 20px;
+}
+
+.materialTableHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.loading-spinner {
+    margin: 20px auto;
+}
+
 .no-data-message {
-    margin-left: 16px;
+    text-align: center;
+    padding: 20px;
+    color: #666;
 }

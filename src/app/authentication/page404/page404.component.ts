@@ -25,10 +25,6 @@ export class Page404Component {
     // El constructor puede quedar vacío si no hay inicializaciones necesarias
   }
 
-  /**
-   * Método para redirigir al usuario al dashboard principal
-   * Se ejecuta cuando el usuario hace clic en el botón "Volver al inicio"
-   */
   redirectHome() {
     // Navega a la ruta especificada usando el Router de Angular
     this._router.navigate(['/dashboard/main']);

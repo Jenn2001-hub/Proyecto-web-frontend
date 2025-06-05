@@ -1,10 +1,11 @@
 // Modelo de datos de usuario
-export class User {
-    id!: number;          // Identificador único
-    username!: string;    // Nombre de usuario/login
-    password!: string;    // Contraseña (debería ser temporal)
-    firsName!: string;    // Nombre (typo: debería ser firstName)
-    lastName!: string;   // Apellido
-    token!: string;      // Token de autenticación JWT
-    administradorId!: number; //identificador de administrador
+export interface User {
+  id: number;
+  nombre: string;
+  email?: string;
+  rol_id?: number;
+  administrador_id?: number;
+  password?: string;
+  token?: string;
+  administradorId?: number;
 }
