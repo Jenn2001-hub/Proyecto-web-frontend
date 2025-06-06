@@ -65,7 +65,7 @@ export class SigninComponent implements OnInit {
    */
   ngOnInit() {
     this.authForm = this.formBuilder.group({
-      username: ['', Validators.required], // Campo requerido
+      email: ['', Validators.required], // Campo requerido
       password: ['', Validators.required], // Campo requerido
     });
   }
@@ -94,7 +94,7 @@ export class SigninComponent implements OnInit {
     // Llama al servicio de autenticación
     this.authService
       .login(
-        this.authForm.get('username')?.value, 
+        this.authForm.get('email')?.value, 
         this.authForm.get('password')?.value
       )
       .subscribe({

@@ -1,124 +1,107 @@
-// src/app/pages/modal-edit-projects/modal-edit-projects.component.ts
+
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import {
-  MAT_DIALOG_DATA, MatDialogModule,
-  MatDialogActions, MatDialogClose, MatDialogTitle,
-  MatDialogContent, MatDialogRef
-} from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import Swal from 'sweetalert2';
+import { UsersService } from 'app/services/users/users.service';
+import { ProjectsService } from 'app/services/projects/projects.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UsersService } from '../../services/users/users.service';
-import { ProjectsService } from '../../services/projects/projects.service';
 
 @Component({
   selector: 'app-modal-edit-projects',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatDialogModule, 
-    MatButtonModule, 
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
     MatSelectModule,
-    MatIconModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogActions,
+    MatDialogClose,
+    MatDialogTitle,
+    MatDialogContent,
     ReactiveFormsModule
   ],
   templateUrl: './modal-edit-projects.component.html',
-  styleUrls: ['./modal-edit-projects.component.scss']
+  styleUrl: './modal-edit-projects.component.scss'
 })
-export class ModalEditProjectsComponent {
-  formUpdateProjects!: FormGroup;
-  usersValues: any[] = [];
+export class ModalEditProjectsComponent implements OnInit {
+
+  formEditProject!: FormGroup;
   administratorsValues: any[] = [];
-  isLoading = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private readonly _formBuilder: FormBuilder,
-    private readonly _snackBar: MatSnackBar,
-    private readonly _userService: UsersService,
     private readonly _projectService: ProjectsService,
-    private readonly dialogRef: MatDialogRef<ModalEditProjectsComponent>
+    private readonly _userService: UsersService,
+    private readonly dialogRef: MatDialogRef<ModalEditProjectsComponent>,
+    private readonly _snackBar: MatSnackBar
   ) {
-    this.updateFormProjects();
-    this.getAllUserByAdministrator();
+    this.createFormProject();
+  }
+
+  ngOnInit(): void {
     this.getAllAdministrator();
+    this.loadProjectData(this.data.project);
   }
 
-  ngOnInit() {
-    if (this.data) {
-      this.loadProjectData(this.data);
-    }
-  }
-
-  updateFormProjects() {
-    this.formUpdateProjects = this._formBuilder.group({
-      id: ['', Validators.required],
+  createFormProject() {
+    this.formEditProject = this._formBuilder.group({
       nombre: ['', Validators.required],
       descripcion: ['', Validators.required],
-      admin_id: ['', Validators.required],
-      usuarios: ['', Validators.required]
-    });
-  }
-
-  loadProjectData(project: any) {
-    this.formUpdateProjects.patchValue({
-      id: project.id,
-      nombre: project.nombre,
-      descripcion: project.descripcion,
-      admin_id: project.admin_id,
-      usuarios: project.usuarios,
-    });
-  }
-
-  getAllUserByAdministrator() {
-    this.isLoading = true;
-    this._userService.getAllUserByAdministrator().subscribe({
-      next: (response: any) => {
-        this.usersValues = response.users;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      }
+      administrador_id: ['', Validators.required]
     });
   }
 
   getAllAdministrator() {
-    this.isLoading = true;
     this._userService.getAllAdministrator().subscribe({
-      next: (response: any) => {
-        this.administratorsValues = response.users;
-        this.isLoading = false;
+      next: (res) => {
+        this.administratorsValues = res.users;
       },
-      error: () => {
-        this.isLoading = false;
+      error: (err) => {
+        console.error(err);
       }
     });
   }
 
-  updateProjects() {
-    if (this.formUpdateProjects.valid) {
-      const projectData = this.formUpdateProjects.value;
-      const projectId = this.data?.id;
-      this._projectService.updateProject(projectId, projectData).subscribe({
-        next: (response: any) => {
-          const updatedProject = response.updatedProject;
-          this._snackBar.open(response.message, 'Cerrar', {duration: 5000});
-          this.dialogRef.close(updatedProject);
-        },
-        error: (error: any) => {
-          const errorMessage = error.error?.result || 'Ocurrió un error inesperado. Por favor intenta nuevamente.';
-          this._snackBar.open(errorMessage, 'Cerrar', {duration: 5000});
-        }
-      });
-    }
+  loadProjectData(project: any) {
+    this.formEditProject.patchValue({
+      nombre: project.nombre,
+      descripcion: project.descripcion,
+      administrador_id: project.administrador_id
+    });
   }
+
+  onUpdate() {
+    if (this.formEditProject.invalid) {
+      Swal.fire('Error', 'Por favor completa los campos', 'error');
+      return;
+    }
+
+    const projectData = {
+      nombre: this.formEditProject.get('nombre')?.value,
+      descripcion: this.formEditProject.get('descripcion')?.value,
+      administrador_id: this.formEditProject.get('administrador_id')?.value
+    };
+
+    this._projectService.updateProject(this.data.project.id, projectData).subscribe({
+      next: (response) => {
+        this._snackBar.open(response.message, 'Cerrar', { duration: 5000 });
+        this.dialogRef.close(true);
+      },
+      error: (error) => {
+        const errorMessage = error.error?.message || 'Ocurrió un error inesperado. Por favor, intenta nuevamente.';
+        this._snackBar.open(errorMessage, 'Cerrar', { duration: 5000 });
+      }
+    });
+  }
+
 }

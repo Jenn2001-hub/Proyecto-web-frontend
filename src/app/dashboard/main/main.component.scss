@@ -1,8 +1,38 @@
+.welcome-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f7fa; /* Fondo claro profesional */
+}
 
-.content {
-background-image: url('/assets/images/radicacion_portada.jpeg');
-background-size: 90%; /* Cambia 70% al valor que desees */
-background-position: center;
-   height: 50vh;
-   width: 80%;
+.welcome-content {
+  text-align: center;
+  max-width: 600px;
+  padding: 2rem;
+  animation: fadeIn 1s ease-in-out;
+
+  .logo {
+    width: 600px;
+    height: 360px;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    color: #46aecd; /* Color principal azul */
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    color: #040404; /* Texto secundario */
+    font-size: 1.2rem;
+    line-height: 1.6;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

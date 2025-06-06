@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-main', // Selector para usar en templates
-  templateUrl: './main.component.html', // Template asociado
-  styleUrls: ['./main.component.scss'], // Estilos específicos
-  standalone: true, // Componente auto-contenido (Angular 14+)
-  imports: [], // Importaciones de otros componentes standalone
+  selector: 'app-main',
+  templateUrl: './main.component.html',
+  styleUrls: ['./main.component.scss'],
+  standalone: true
 })
 export class MainComponent {
   

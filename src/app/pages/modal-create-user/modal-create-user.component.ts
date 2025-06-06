@@ -1,26 +1,16 @@
-import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  Validators,
-  FormGroup,
-  ReactiveFormsModule,
-  FormsModule
-} from '@angular/forms';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef
-} from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import Swal from 'sweetalert2';
 import { UsersService } from 'app/services/users/users.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-modal-create-user',
@@ -34,6 +24,10 @@ import Swal from 'sweetalert2';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDialogActions,
+    MatDialogClose,
+    MatDialogTitle,
+    MatDialogContent,
     ReactiveFormsModule
   ],
   templateUrl: './modal-create-user.component.html',
@@ -41,7 +35,7 @@ import Swal from 'sweetalert2';
 })
 export class ModalCreateUserComponent implements OnInit {
   formCreateUser!: FormGroup;
-  administratorsValue: any[] = [];
+  administratorsValues: any[] = [];
   showFieldAdministrator: boolean = false;
 
   constructor(
@@ -62,42 +56,33 @@ export class ModalCreateUserComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('🔍 DEBUG: Modal iniciado');
     this.getAllAdministrator();
   }
 
   private createFormUsers() {
     this.formCreateUser = this._formBuilder.group({
       nombre: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      email: ['', Validators.required],
+      password: ['', Validators.required],
       confirmPassword: ['', Validators.required],
       rol_id: ['', Validators.required],
-      administrador_id: [undefined]
+      administrador_id: [undefined, Validators.required]
     });
-
-    console.log('🔍 DEBUG: Formulario creado', this.formCreateUser);
   }
 
   private getAllAdministrator() {
-    console.log('🔍 DEBUG: Llamando a getAllAdministrator()');
     this._userService.getAllAdministrator().subscribe({
-      next: (res) => {
-        console.log('🔍 DEBUG: Respuesta de administradores:', res);
-        this.administratorsValue = res.users;
-        console.log('🔍 DEBUG: Administradores asignados a administratorsValue:', this.administratorsValue);
-      },
-      error: (err) => {
-        console.error('❌ ERROR al obtener administradores:', err);
-        this._snackBar.open('Error al cargar administradores', 'Cerrar', {
-          duration: 3000
-        });
-      }
+        next: (res: any) => {
+            this.administratorsValues = res.users;
+        },
+        error: (err) => {
+            console.error('Error:', err);
+            this._snackBar.open('Error al cargar administradores', 'Cerrar', {duration: 3000});
+        }
     });
   }
 
   onChangeRole(event: any) {
-    console.log('🔍 DEBUG: Rol seleccionado:', event.value);
     if (event.value === '1') {
       this.hideAdministratorField();
     } else {
@@ -106,10 +91,7 @@ export class ModalCreateUserComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('🔍 DEBUG: Enviando formulario', this.formCreateUser.value);
-
     if (this.formCreateUser.invalid) {
-      console.warn('⚠️ Formulario inválido:', this.formCreateUser.errors, this.formCreateUser);
       Swal.fire('Error', 'Por favor completa todos los campos requeridos', 'error');
       return;
     }
@@ -122,16 +104,12 @@ export class ModalCreateUserComponent implements OnInit {
       administrador_id: this.formCreateUser.get('administrador_id')?.value
     };
 
-    console.log('🔍 DEBUG: Datos enviados al backend:', userData);
-
     this._userService.createUser(userData).subscribe({
       next: (response) => {
-        console.log('✅ Usuario creado correctamente:', response);
         this._snackBar.open('Usuario creado exitosamente', 'Cerrar', { duration: 3000 });
         this._dialogRef.close(true);
       },
       error: (error) => {
-        console.error('❌ ERROR al crear usuario:', error);
         const errorMsg = error.error?.message || 'Error al crear usuario';
         this._snackBar.open(errorMsg, 'Cerrar', { duration: 5000 });
       }
@@ -141,7 +119,6 @@ export class ModalCreateUserComponent implements OnInit {
   private validatePassword(confirmPassword: string) {
     const password = this.formCreateUser.get('password')?.value;
     if (password !== confirmPassword) {
-      console.warn('⚠️ Contraseñas no coinciden');
       this.formCreateUser.get('confirmPassword')?.setErrors({ invalid: true });
     } else {
       this.formCreateUser.get('confirmPassword')?.setErrors(null);
@@ -149,17 +126,14 @@ export class ModalCreateUserComponent implements OnInit {
   }
 
   private showAdministratorField() {
-    console.log('🔍 DEBUG: Mostrando campo administrador');
     this.showFieldAdministrator = true;
     this.formCreateUser.get('administrador_id')?.setValidators([Validators.required]);
     this.formCreateUser.get('administrador_id')?.updateValueAndValidity();
   }
 
   private hideAdministratorField() {
-    console.log('🔍 DEBUG: Ocultando campo administrador');
     this.showFieldAdministrator = false;
     this.formCreateUser.get('administrador_id')?.clearValidators();
     this.formCreateUser.get('administrador_id')?.updateValueAndValidity();
-    this.formCreateUser.get('administrador_id')?.setValue(null);
   }
 }

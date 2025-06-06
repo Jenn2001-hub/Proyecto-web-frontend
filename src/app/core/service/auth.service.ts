@@ -25,45 +25,31 @@ export class AuthService {
 
   constructor(
     private readonly http: HttpClient, // Cliente HTTP para llamadas API
-    private readonly router: Router // Router para navegación
-  ) {
+    private readonly router: Router ) {
     // Inicializa el BehaviorSubject con el usuario de sessionStorage
-    this.currentUserSubject = new BehaviorSubject<User>(
-      JSON.parse(sessionStorage.getItem('currentUser') || '{}')
+      this.currentUserSubject = new BehaviorSubject<User>(
+        JSON.parse(sessionStorage.getItem('currentUser') || '{}')
     );
     // Crea el observable público
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  /**
-   * Método para iniciar sesión
-   * @param email Correo electrónico del usuario
-   * @param password Contraseña del usuario
-   * @returns Observable con la respuesta del servidor
-   */
   login(email: string, password: string): Observable<any> {
     const endpoint = `${this.urlBaseServices}/auth/login`;
     return this.http.post<any>(endpoint, { email, password });
   }
 
-  /**
-   * Verifica si el usuario está autenticado
-   * @returns boolean - true si existe token en sessionStorage
-   */
   isAuthenticated(): boolean {
     const accessToken = sessionStorage.getItem('accessToken');
     return accessToken !== null;
   }
 
-  /**
-   * Obtiene y decodifica la información del token JWT
-   * @returns Objeto con la información decodificada o undefined
-   */
   getAuthFromSessionStorage(): any {
     try {
       const lsValue = sessionStorage.getItem('accessToken');
-      if (!lsValue) return undefined;
-      
+      if (!lsValue){ 
+        return undefined;
+      }
       const decodedToken: any = jwt.jwtDecode(lsValue);
       return decodedToken;
     } catch (error) {
@@ -72,53 +58,29 @@ export class AuthService {
     }
   }
 
-  /**
-   * Almacena el token en sessionStorage
-   * @param token Token JWT
-   */
   setToken(token: string): void {
     sessionStorage.setItem('token', token);
   }
 
-  /**
-   * Obtiene el token de sessionStorage
-   * @returns Token JWT o null
-   */
   getToken(): string | null {
     return sessionStorage.getItem('token');
   }
 
-  /**
-   * Verifica si el usuario logueado es administrador
-   * @returns boolean - true si el rol es ADMIN
-   */
   isAdminLogged(): boolean {
     const userInfo = this.getAuthFromSessionStorage();
-    return userInfo?.rol_id === ROLES.ADMIN;
+    return userInfo.rol_id === ROLES.ADMIN;
   }
 
-  /**
-   * Verifica si el usuario logueado es USER normal
-   * @returns boolean - true si el rol es USER
-   */
   isUserLogged(): boolean {
     const userInfo = this.getAuthFromSessionStorage();
-    return userInfo?.rol_id === ROLES.USER;
+    return userInfo.rol_id === ROLES.USER;
   }
 
-  /**
-   * Obtiene el token de acceso de sessionStorage
-   * @returns Token JWT o null
-   */
   getTokenFromSessionStorage(): string | null {
-    return sessionStorage.getItem('accessToken');
-  } 
+    const isValue = sessionStorage.getItem('accessToken');
+    return isValue;
+  }
 
-  /**
-   * Cierra la sesión del usuario
-   * - Elimina el token
-   * - Redirige a la página de login
-   */
   logout(): void {
     sessionStorage.removeItem('token');
     this.router.navigate(['/authentication/signin'], {

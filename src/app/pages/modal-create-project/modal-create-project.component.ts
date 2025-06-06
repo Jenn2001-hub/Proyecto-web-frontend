@@ -10,7 +10,6 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 import { UsersService } from '../../services/users/users.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectsService } from '../../services/projects/projects.service';
 
@@ -26,6 +25,10 @@ import { ProjectsService } from '../../services/projects/projects.service';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDialogActions,
+    MatDialogClose,
+    MatDialogTitle,
+    MatDialogContent,
     ReactiveFormsModule
   ],
   templateUrl: './modal-create-project.component.html',
@@ -34,38 +37,27 @@ import { ProjectsService } from '../../services/projects/projects.service';
 export class ModalCreateProjectComponent implements OnInit {
   formCreateProject!: FormGroup;
   administratorsValues: any[] = [];
-  usersValues: any[] = [];
-  showFieldAdministrator: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private readonly _formBuilder: FormBuilder,
     private readonly _userService: UsersService,
     private readonly _projectService: ProjectsService,
-    private readonly dialogRef: MatDialogRef<ModalCreateProjectComponent>,
+    private readonly _dialogRef: MatDialogRef<ModalCreateProjectComponent>,
     private readonly _snackBar: MatSnackBar,
   ) {
     this.createFormProject();
-    
-    this.formCreateProject.controls['confirmPassword']?.valueChanges.pipe(
-      debounceTime(1000),
-      distinctUntilChanged()
-    ).subscribe((value) => {
-      this.validatePassword(value);
-    });
   }
 
   ngOnInit(): void {
     this.getAllAdministrator();
-    this.getAllUsers();
   }
   
   private createFormProject() {
     this.formCreateProject = this._formBuilder.group({
       nombre: ['', Validators.required],
       descripcion: ['', Validators.required],
-      admin_id: ['', Validators.required],
-      usuarios: [[]]
+      administrador_id: ['', Validators.required],
     });
   }
 
@@ -76,51 +68,33 @@ export class ModalCreateProjectComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this._snackBar.open('Error al cargar administradores', 'Cerrar', {
-          duration: 3000
-        });
       }
     });
   }
 
-  private getAllUsers() {
-    this._userService.getAllUsers().subscribe({
-      next: (res: any) => {
-        this.usersValues = res.users;
-      },
-      error: (err) => {
-        console.error(err);
-        this._snackBar.open('Error al cargar usuarios', 'Cerrar', {
-          duration: 3000
-        });
-      }
-    });
-  }
-
-  createProject() {
+  onSubmit() {
     if (this.formCreateProject.invalid) {
-      Swal.fire('Error', 'Por favor completa todos los campos requeridos', 'error');
+      Swal.fire('Error', 'Por favor completa los campos', 'error');
       return;
     }
-    
-    const projectData = this.formCreateProject.value;
+
+    const projectData = {
+      nombre: this.formCreateProject.get('nombre')?.value,
+      descripcion: this.formCreateProject.get('descripcion')?.value,
+      administrador_id: this.formCreateProject.get('administrador_id')?.value
+    };
+
     this._projectService.createProject(projectData).subscribe({
       next: (response) => {
-        this._snackBar.open('Proyecto creado exitosamente', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(true);
+        this._snackBar.open(response.message, 'Cerrar', { duration: 5000 });
+        this.formCreateProject.reset();
+        this._dialogRef.close(true);
       },
       error: (error) => {
-        this._snackBar.open(error.error?.message || 'Error al crear proyecto', 'Cerrar', { duration: 5000 });
+        const errorMessage = error.error?.message || 'Ocurrió un error inesperado. Por favor, intenta nuevamente.';
+        this._snackBar.open(errorMessage, 'Cerrar', { duration: 5000 });
       }
     });
   }
 
-  private validatePassword(confirmPassword: string) {
-    const password = this.formCreateProject.get('password')?.value;
-    if (password !== confirmPassword) {
-      this.formCreateProject.get('confirmPassword')?.setErrors({ invalid: true });
-    } else {
-      this.formCreateProject.get('confirmPassword')?.setErrors(null);
-    }
-  }
 }

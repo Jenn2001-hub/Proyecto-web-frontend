@@ -28,11 +28,11 @@
               <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width" appearance="outline">
                   <mat-label>Correo electrónico</mat-label>
-                  <input matInput formControlName="username" /> <!-- Campo vinculado al FormGroup -->
+                  <input matInput formControlName="email" /> <!-- Campo vinculado al FormGroup -->
                   <mat-icon matSuffix class="face-icon">face</mat-icon> <!-- Ícono decorativo -->
                   
                   <!-- Validación: Mensaje de error si el campo está vacío -->
-                  @if (authForm.get('username')?.hasError('required')) {
+                  @if (authForm.get('email')?.hasError('required')) {
                     <mat-error>
                       El correo electrónico es requerido
                     </mat-error>

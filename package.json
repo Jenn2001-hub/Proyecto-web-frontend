@@ -1,5 +1,5 @@
 {
-  "name": "NOMBRE DE PREFERENCIA",
+  "name": "Gestor web",
   "version": "11.0.0",
   "scripts": {
     "ng": "ng",
@@ -18,7 +18,7 @@
     "@angular/forms": "^18.0.1",
     "@angular/google-maps": "^18.0.1",
     "@angular/localize": "^18.0.1",
-    "@angular/material": "^18.0.1",
+    "@angular/material": "^18.2.14",
     "@angular/material-moment-adapter": "^18.0.1",
     "@angular/platform-browser": "^18.0.1",
     "@angular/platform-browser-dynamic": "^18.0.1",

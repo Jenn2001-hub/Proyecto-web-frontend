@@ -1,0 +1,64 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+h2.mat-dialog-title {
+  color: #3f51b5;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.custom-margin {
+  margin: 0 -24px;
+}
+
+.mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+
+  &.w-100 {
+    width: 100%;
+  }
+}
+
+.mat-dialog-actions {
+  padding: 16px 0 0;
+  border-top: 1px solid #e0e0e0;
+  justify-content: flex-end;
+
+  button {
+    margin-left: 8px;
+    
+    &[mat-button] {
+      color: #757575;
+    }
+
+    &[cdkFocusInitial] {
+      background-color: #3f51b5;
+      color: white;
+    }
+  }
+}
+
+.mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-select {
+  min-width: 200px;
+}
+
+.mat-option {
+  padding: 8px 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .row > div {
+    padding-bottom: 8px;
+  }
+}
