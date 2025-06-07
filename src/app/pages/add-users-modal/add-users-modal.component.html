@@ -1,0 +1,44 @@
+<div class="add-users-container">
+  <h2 mat-dialog-title>Agregar Usuarios al Proyecto</h2>
+  
+  <div mat-dialog-content>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar usuarios</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (input)="filterUsers()" placeholder="Buscar por nombre o email">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    @if (isLoading) {
+      <div class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else {
+      <mat-selection-list #usersList [multiple]="true">
+        @for (user of filteredUsers; track user.id) {
+          <mat-list-option [selected]="isUserSelected(user)" (click)="toggleUserSelection(user)">
+            <div class="user-option">
+              <mat-icon matListIcon>person</mat-icon>
+              <div class="user-info">
+                <span>{{user.nombre}}</span>
+                <small>{{user.email}}</small>
+              </div>
+            </div>
+          </mat-list-option>
+        }
+      </mat-selection-list>
+      
+      @if (filteredUsers.length === 0) {
+        <p class="no-results">No se encontraron usuarios disponibles</p>
+      }
+    }
+  </div>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" 
+            (click)="onAddUsers()" 
+            [disabled]="selectedUsers.length === 0">
+      Agregar {{selectedUsers.length}} usuario(s)
+    </button>
+  </mat-dialog-actions>
+</div>

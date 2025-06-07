@@ -145,15 +145,21 @@ export class UsersComponent {
 
   // Método que obtiene la lista de usuarios
   getAllUserByAdministrator(filters?: any): void {
-    console.log('Filtros enviados:', filters); // Depurador, pa solucionar un error :)
-    this.isLoading = true; //En true para mostrar el indicador de carga
-    this.userService.getAllUserByAdministrator(filters).subscribe({ // Llama al servicio para obtener la lista de usuarios según los filtros
+    console.log('Filtros enviados:', filters);
+    this.isLoading = true;
+    this.userService.getAllUserByAdministrator(filters).subscribe({
       next: (response) => {
-        this.usersList = response.users; // Asigna la lista de usuarios a la variable usersList
-        console.log('listando', this.usersList); // Otro depurador
-        this.dataSource.data = response.users;
+        // Verificar la estructura real de la respuesta
+        this.usersList = response.users || response.usuarios || response;
+        console.log('listando', this.usersList);
+        this.dataSource.data = this.usersList;
         this.dataSource.paginator = this.paginator;
-        this.isLoading = false; // En false para ocultar el indicador de carga
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener usuarios:', error);
+        this.isLoading = false;
+        this._snackBar.open('Error al cargar usuarios', 'Cerrar', {duration: 3000});
       }
     });
   }

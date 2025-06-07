@@ -1,0 +1,72 @@
+<div class="project-details-container">
+  <h2 mat-dialog-title>Editar Proyecto</h2>
+  <div mat-dialog-content class="dialog-content">
+    <!-- Sección de información del proyecto -->
+    <div class="project-info-section">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Información del Proyecto</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="info-field">
+            <label>Nombre del Proyecto:</label>
+            <p>{{data.project.nombre}}</p>
+          </div>
+          
+          <div class="info-field">
+            <label>Descripción:</label>
+            <p>{{data.project.descripcion || 'No hay descripción disponible'}}</p>
+          </div>
+          
+          <div class="info-field">
+            <label>Administrador:</label>
+            <p>{{data.project.administrador?.nombre || 'No asignado'}}</p>
+          </div>
+          
+          <div class="info-field">
+            <label>Fecha de Creación:</label>
+            <p>{{data.project.fecha_creacion | date:'mediumDate'}}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Sección de usuarios -->
+    <div class="users-section">
+      <mat-card class="users-card">
+        <mat-card-header>
+          <mat-card-title>Usuarios Asociados ({{data.project.usuarios?.length || 0}})</mat-card-title>
+          <button mat-flat-button color="primary" (click)="openAddUsersDialog()">
+            <mat-icon>person_add</mat-icon>
+            Agregar Usuarios
+          </button>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <mat-list class="users-list">
+            @if(data.project.usuarios && data.project.usuarios.length > 0) {
+              @for (user of data.project.usuarios; track user.id) {
+                <mat-list-item>
+                  <mat-icon matListItemIcon>person</mat-icon>
+                  <div matListItemTitle>{{user.nombre}}</div>
+                  <div matListItemLine>{{user.email}}</div>
+                  <button mat-icon-button color="warn" (click)="removeUser(user.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-list-item>
+              }
+            } @else {
+              <p class="no-users">No hay usuarios asociados</p>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cerrar</button>
+    <button mat-flat-button color="primary" (click)="saveChanges()">Guardar Cambios</button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,48 @@
+.add-users-container {
+  min-width: 500px;
+  max-width: 800px;
+  
+  .search-field {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .users-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-top: 0;
+    
+    .user-option {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      
+      .user-info {
+        margin-left: 12px;
+        
+        small {
+          color: rgba(0, 0, 0, 0.6);
+          display: block;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+  
+  .no-results {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    padding: 24px;
+  }
+
+  mat-dialog-actions {
+    padding: 16px 0 0;
+    border-top: 1px solid #eee;
+  }
+}

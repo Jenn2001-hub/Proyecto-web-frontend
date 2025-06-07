@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { URL_SERVICIOS } from '@core/models/config';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,43 +15,56 @@ export class ProjectsService {
 
   // Crea un nuevo proyecto
   createProject(projectData: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/create`;
+    const endpoint = `${this.urlBaseServices}/project/create`;
     return this.http.post<any>(endpoint, projectData);
   }
 
   // Actualiza un proyecto
   updateProject(projectId: number, projectData: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/update/${projectId}`;
+    const endpoint = `${this.urlBaseServices}/project/update/${projectId}`;
     return this.http.put<any>(endpoint, projectData);
   }
 
   // Obtiene todos los proyectos
   getAllProjects(): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/`;
-    return this.http.get<any>(endpoint);
+    const endpoint = `${this.urlBaseServices}/project/`;
+    return this.http.get<any>(endpoint).pipe(
+      map((response: any) => {
+        // Normalizar la respuesta
+        return {
+          proyectos: response.data || response.proyectos || response
+        };
+      })
+    );
   }
 
-  // Obtiene un proyecto por ID
   getProjectsByUserId(userId: number): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/${userId}`;
-    return this.http.get<any>(endpoint);
+    const endpoint = `${this.urlBaseServices}/project/${userId}`;
+    return this.http.get<any>(endpoint).pipe(
+      map((response: any) => {
+        // Normalizar la respuesta
+        return {
+          proyectos: response.data || response.proyectos || response
+        };
+      })
+    );
   }
 
   // Elimina un proyecto
   deleteProject(projectId: number): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/delete/${projectId}`;
+    const endpoint = `${this.urlBaseServices}/project/delete/${projectId}`;
     return this.http.delete<any>(endpoint);
   }
 
   // Asocia usuarios a un proyecto
   assingUsersToProject(data: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/associate`;
+    const endpoint = `${this.urlBaseServices}/project/associate`;
     return this.http.post<any>(endpoint, data);
   }
 
   // Desasocia un usuario de un proyecto
   removeUserFromProject(data: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/projects/disassociate`;
+    const endpoint = `${this.urlBaseServices}/project/disassociate`;
     return this.http.request('delete', endpoint, { body: data });
   }
 

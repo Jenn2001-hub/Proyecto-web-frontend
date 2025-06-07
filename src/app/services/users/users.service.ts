@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 // Importa la URL base de los servicios desde la configuración
 import { URL_SERVICIOS } from '@core/models/config';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 // Decorador que marca la clase como un servicio inyectable disponible en toda la app
 @Injectable({
@@ -16,69 +17,47 @@ export class UsersService {
   // Constructor con inyección de dependencia del HttpClient
   constructor(private readonly http: HttpClient) { }
 
-  /**
-   * Crea un nuevo usuario
-   * @param userData Datos del usuario a crear
-   * @return Observable con la respuesta del servidor
-   */
   createUser(userData: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users/create`;
+    const endpoint = `${this.urlBaseServices}/user/create`;
     return this.http.post<any>(endpoint, userData);
   }
 
-  /**
-   * Actualiza un usuario existente
-   * @param userId ID del usuario a actualizar
-   * @param userData Nuevos datos del usuario
-   * @return Observable con la respuesta del servidor
-   */
   updateUser(userId: number, userData: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users/update/${userId}`;
+    const endpoint = `${this.urlBaseServices}/user/update/${userId}`;
     return this.http.put<any>(endpoint, userData);
   }
 
-  /**
-   * Elimina un usuario
-   * @param userId ID del usuario a eliminar
-   * @return Observable con la respuesta del servidor
-   */
   deleteUser(userId: number): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users/delete/${userId}`;
+    const endpoint = `${this.urlBaseServices}/user/delete/${userId}`;
     return this.http.delete<any>(endpoint);
   }
 
-  /**
-   * Obtiene todos los usuarios filtrados por administrador
-   * @param filters Objeto con filtros opcionales (nombre, email)
-   * @return Observable con la lista de usuarios
-   */
   getAllUserByAdministrator(filters?: any): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users`;
-    // Crea parámetros HTTP desde los filtros
+    const endpoint = `${this.urlBaseServices}/user`;
     const params = new HttpParams({ 
       fromObject: {
-        nombre: filters?.nombre || '', // Filtro por nombre (vacío si no existe)
-        email: filters?.email || '' // Filtro por email (vacío si no existe)
+        nombre: filters?.nombre || '',
+        email: filters?.email || ''
       } 
     });
-    return this.http.get<any>(endpoint, { params });
+    
+    return this.http.get<any>(endpoint, { params }).pipe(
+      map((response: any) => {
+        // Normalizar la respuesta
+        return {
+          users: response.data || response.users || response
+        };
+      })
+    );
   }
 
-  /**
-   * Obtiene todos los usuarios con rol de administrador (rol ID = 1)
-   * @return Observable con la lista de administradores
-   */
   getAllAdministrator(): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users/rol/1`;
+    const endpoint = `${this.urlBaseServices}/user/rol/1`;
     return this.http.get<any>(endpoint);
   }
 
-  /**
-   * Obtiene todos los usuarios con rol normal (rol ID = 2)
-   * @return Observable con la lista de usuarios
-   */
   getAllUsers(): Observable<any> {
-    const endpoint = `${this.urlBaseServices}/users/rol/2`;
+    const endpoint = `${this.urlBaseServices}/user/rol/2`;
     return this.http.get<any>(endpoint);
   }
 }

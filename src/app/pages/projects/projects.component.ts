@@ -15,12 +15,12 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProjectsService } from 'app/services/projects/projects.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ModalCreateProjectComponent } from '../modal-create-project/modal-create-project.component';
 import { ModalEditProjectsComponent } from '../modal-edit-projects/modal-edit-projects.component';
 import { AuthService } from '@core';
-
+import { ModalViewProjectComponent } from '../modal-view-project/modal-view-project.component';
 
 
 
@@ -43,7 +43,8 @@ import { AuthService } from '@core';
     MatPaginatorModule,
     MatButtonModule,
     MatTableModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
@@ -132,11 +133,16 @@ export class ProjectsComponent {
     this.isLoading = true;
     this.projectService.getAllProjects().subscribe({
       next: (response) => {
-        this.projectsList = response;
+        this.projectsList = response.proyectos || response.projects || response;
         console.log('Listando todos los proyectos', this.projectsList);
-        this.dataSource.data = response.projects;
+        this.dataSource.data = this.projectsList;
         this.dataSource.paginator = this.paginator;
         this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener proyectos:', error);
+        this.isLoading = false;
+        this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
       }
     });
   }
@@ -145,19 +151,36 @@ export class ProjectsComponent {
   this.isLoading = true;
   this.projectService.getProjectsByUserId(userId).subscribe({
     next: (response) => {
-      this.projectsList = response;
+      this.projectsList = response.proyectos || response.projects || response;
       console.log('Listando proyectos del usuario', this.projectsList);
-      this.dataSource.data = response;
+      this.dataSource.data = this.projectsList;
       this.dataSource.paginator = this.paginator;
       this.isLoading = false;
+    },
+    error: (error) => {
+      console.error('Error al obtener proyectos del usuario:', error);
+      this.isLoading = false;
+      this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
     }
   });
 }
 
   openModalViewProject(project: any): void {
-  // para visualizar el proyecto
-  console.log(project);
-}
+    const dialogRef = this.dialogModel.open(ModalViewProjectComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: { project: project },
+      disableClose: true,
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.getAllProjects(); // Refrescar la lista si hubo cambios
+      }
+    });
+  }
 
   openModalCreateProject(): void {
     const dialogRef = this.dialogModel.open(ModalCreateProjectComponent, {
