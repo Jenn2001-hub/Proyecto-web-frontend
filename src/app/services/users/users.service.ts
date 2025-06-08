@@ -34,12 +34,12 @@ export class UsersService {
 
   getAllUserByAdministrator(filters?: any): Observable<any> {
     const endpoint = `${this.urlBaseServices}/user`;
-    const params = new HttpParams({ 
-      fromObject: {
-        nombre: filters?.nombre || '',
-        email: filters?.email || ''
-      } 
-    });
+    let params = new HttpParams();
+  
+    if (filters) {
+      if (filters.nombre) params = params.set('nombre', filters.nombre);
+      if (filters.email) params = params.set('email', filters.email);
+    }
     
     return this.http.get<any>(endpoint, { params }).pipe(
       map((response: any) => {

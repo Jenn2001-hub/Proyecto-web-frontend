@@ -73,7 +73,7 @@ export class ModalCreateUserComponent implements OnInit {
   private getAllAdministrator() {
     this._userService.getAllAdministrator().subscribe({
         next: (res: any) => {
-            this.administratorsValues = res.users;
+            this.administratorsValues = res.data || res.users || res;
         },
         error: (err) => {
             console.error('Error:', err);
@@ -96,12 +96,13 @@ export class ModalCreateUserComponent implements OnInit {
       return;
     }
 
+    const rol_id = Number(this.formCreateUser.get('rol_id')?.value)
     const userData = {
       nombre: this.formCreateUser.get('nombre')?.value,
       email: this.formCreateUser.get('email')?.value,
       password: this.formCreateUser.get('password')?.value,
-      rol_id: Number(this.formCreateUser.get('rol_id')?.value),
-      administrador_id: this.formCreateUser.get('administrador_id')?.value
+      rol_id: rol_id,
+      administrador_id: rol_id === 1 ? undefined : this.formCreateUser.get('administrador_id')?.value
     };
 
     this._userService.createUser(userData).subscribe({
@@ -118,6 +119,8 @@ export class ModalCreateUserComponent implements OnInit {
 
   private validatePassword(confirmPassword: string) {
     const password = this.formCreateUser.get('password')?.value;
+    if (!password || !confirmPassword) return;
+    
     if (password !== confirmPassword) {
       this.formCreateUser.get('confirmPassword')?.setErrors({ invalid: true });
     } else {

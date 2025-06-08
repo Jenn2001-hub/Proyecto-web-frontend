@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { AddUsersModalComponent } from '../modal-add-users/modal-add-users.component'; // Asegúrate de crear este componente
+import { ProjectsService } from 'app/services/projects/projects.service';
 
 @Component({
   selector: 'app-modal-view-project',

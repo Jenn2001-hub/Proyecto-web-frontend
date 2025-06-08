@@ -57,7 +57,7 @@ export class ProjectsService {
   }
 
   // Asocia usuarios a un proyecto
-  assingUsersToProject(data: any): Observable<any> {
+  assingUsersToProject(data: {project_id: number, usuario_id: number, administrador_id: number[]}): Observable<any> {
     const endpoint = `${this.urlBaseServices}/project/associate`;
     return this.http.post<any>(endpoint, data);
   }

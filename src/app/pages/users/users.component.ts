@@ -125,7 +125,7 @@ export class UsersComponent {
       case 1:
         return 'Administrador';
       case 2:
-        return 'Usuarios';
+        return 'Usuario';
       default:
         return 'Desconocido';
     }
