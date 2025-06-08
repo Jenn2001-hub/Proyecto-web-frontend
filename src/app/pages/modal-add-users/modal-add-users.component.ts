@@ -33,8 +33,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatProgressSpinnerModule,
     MatSelectionList
   ],
-  templateUrl: './add-users-modal.component.html',
-  styleUrls: ['./add-users-modal.component.scss']
+  templateUrl: './modal-add-users.component.html',
+  styleUrls: ['./modal-add-users.component.scss']
 })
 export class AddUsersModalComponent implements OnInit {
   searchTerm = '';

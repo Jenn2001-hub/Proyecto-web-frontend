@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AddUsersModalComponent } from './add-users-modal.component';
+import { AddUsersModalComponent } from './modal-add-users.component';
 
 describe('AddUsersModalComponent', () => {
   let component: AddUsersModalComponent;
