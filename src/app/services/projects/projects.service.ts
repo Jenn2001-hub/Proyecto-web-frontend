@@ -26,11 +26,10 @@ export class ProjectsService {
   }
 
   // Obtiene todos los proyectos
-  getAllProjects(): Observable<any> {
+  getAllProjects(filters?: any): Observable<any> {
     const endpoint = `${this.urlBaseServices}/project/`;
-    return this.http.get<any>(endpoint).pipe(
+    return this.http.get<any>(endpoint, { params: filters }).pipe(
       map((response: any) => {
-        // Normalizar la respuesta
         return {
           proyectos: response.data || response.proyectos || response
         };

@@ -125,15 +125,44 @@ export class ProjectsComponent {
       distinctUntilChanged()
     ).subscribe((value: any) => {
       this.projectDefaultFilterSearch[filterKey] = value;
-      this.getAllProjects({ ...this.projectDefaultFilterSearch, [filterKey]: value });
+      this.refreshProjectsListWithFilters();
     });
+  }
+
+  refreshProjectsListWithFilters(): void {
+    const userInfo = this.authService.getAuthFromSessionStorage();
+    const userId = userInfo.id;
+    
+    if (userId === 1) {
+      this.getAllProjects(this.projectDefaultFilterSearch);
+    } else {
+      // Para usuarios normales, primero obtener todos sus proyectos y luego filtrar localmente
+      this.getProjectsByUserId(userId);
+    }
   }
 
   getAllProjects(filters?: any): void {
     this.isLoading = true;
+    
+    // Si hay filtros, construye los parámetros de consulta
+    let params = {};
+    if (filters) {
+      params = { ...filters };
+    }
+
     this.projectService.getAllProjects().subscribe({
       next: (response) => {
-        this.projectsList = response.proyectos || response.projects || response;
+        let projects = response.proyectos || response.projects || response;
+        
+        // Aplicar filtro local si hay nombre en los filtros
+        if (filters?.nombre) {
+          const searchTerm = filters.nombre.toLowerCase();
+          projects = projects.filter((project: any) => 
+            project.nombre.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        this.projectsList = projects;
         console.log('Listando todos los proyectos', this.projectsList);
         this.dataSource.data = this.projectsList;
         this.dataSource.paginator = this.paginator;
@@ -147,23 +176,32 @@ export class ProjectsComponent {
     });
   }
 
-  getProjectsByUserId(userId: number,): void {
-  this.isLoading = true;
-  this.projectService.getProjectsByUserId(userId).subscribe({
-    next: (response) => {
-      this.projectsList = response.proyectos || response.projects || response;
-      console.log('Listando proyectos del usuario', this.projectsList);
-      this.dataSource.data = this.projectsList;
-      this.dataSource.paginator = this.paginator;
-      this.isLoading = false;
-    },
-    error: (error) => {
-      console.error('Error al obtener proyectos del usuario:', error);
-      this.isLoading = false;
-      this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
-    }
-  });
-}
+  getProjectsByUserId(userId: number): void {
+    this.isLoading = true;
+    this.projectService.getProjectsByUserId(userId).subscribe({
+      next: (response) => {
+        let projects = response.proyectos || response.projects || response;
+        
+        // Aplicar filtro local si hay nombre en los filtros
+        if (this.projectDefaultFilterSearch.nombre) {
+          const searchTerm = this.projectDefaultFilterSearch.nombre.toLowerCase();
+          projects = projects.filter((project: any) => 
+            project.nombre.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        this.projectsList = projects;
+        this.dataSource.data = this.projectsList;
+        this.dataSource.paginator = this.paginator;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener proyectos del usuario:', error);
+        this.isLoading = false;
+        this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
+      }
+    });
+  }
 
   openModalViewProject(project: any): void {
     const dialogRef = this.dialogModel.open(ModalViewProjectComponent, {
@@ -176,10 +214,22 @@ export class ProjectsComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.getAllProjects(); // Refrescar la lista si hubo cambios
+      if (result === true) { // Verificar explícitamente si hubo cambios
+        this.refreshProjectsList();
       }
     });
+  }
+
+  // Nuevo método para refrescar la lista
+  refreshProjectsList(): void {
+    const userInfo = this.authService.getAuthFromSessionStorage();
+    const userId = userInfo.id;
+    
+    if (userId === 1) {
+      this.getAllProjects();
+    } else {
+      this.getProjectsByUserId(userId);
+    }
   }
 
   openModalCreateProject(): void {
