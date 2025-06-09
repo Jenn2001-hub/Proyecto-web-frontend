@@ -22,9 +22,6 @@ import { ModalEditProjectsComponent } from '../modal-edit-projects/modal-edit-pr
 import { AuthService } from '@core';
 import { ModalViewProjectComponent } from '../modal-view-project/modal-view-project.component';
 
-
-
-
 @Component({
   selector: 'app-projects',
   standalone: true,
@@ -50,7 +47,6 @@ import { ModalViewProjectComponent } from '../modal-view-project/modal-view-proj
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent {
-
   displayedColumns: string[] = [
     'nombre',
     'descripcion',
@@ -68,19 +64,13 @@ export class ProjectsComponent {
     },
   ];
 
-  breadscrumsDetails = [
-    { 
-      title: '',
-    },
-  ];
-
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
   projectFormSearchFilter!: FormGroup;
   projectsList: any[] = [];
-
   isLoading = false;
+  userRole: any;
 
   projectDefaultFilterSearch: any = {
     nombre: undefined,
@@ -92,24 +82,21 @@ export class ProjectsComponent {
     private readonly dialogModel: MatDialog,
     private readonly _snackBar: MatSnackBar,
     private readonly authService: AuthService,
-    
   ) { }
 
-  userRole: any; // Variable con el rol_id almacenado para utilizarlo en el html
-
   ngOnInit(): void {
-    const userInfo = this.authService.getAuthFromSessionStorage(); // Para sacar la info del usuario logueado
-    const userId = userInfo.id; // sacamos el ID en especifico
-    this.userRole = userInfo.rol_id; // sacamos el rol del usuario logueado
-    console.log('userRole:', this.userRole);
+    const userInfo = this.authService.getAuthFromSessionStorage();
+    const userId = userInfo.id;
+    this.userRole = userInfo.rol_id;
+    
     this.createProjectFormSearchFilter();
-    if (userId === 1) { // pequeña comprovacion para que el S.U. pueda ver todos los proyectos
-        this.getAllProjects();
-          console.log('Listando todos los proyectos Iniciales', this.projectsList);
+    
+    if (userId === 1) {
+      this.getAllProjects();
     } else {
-        this.getProjectsByUserId(userId);
-          console.log('Listando proyectos userId Iniciales', this.projectsList);
+      this.getProjectsByUserId(userId);
     }
+    
     this.handleProjectFilterChance('nombre', 'nombre');
   }
 
@@ -136,7 +123,6 @@ export class ProjectsComponent {
     if (userId === 1) {
       this.getAllProjects(this.projectDefaultFilterSearch);
     } else {
-      // Para usuarios normales, primero obtener todos sus proyectos y luego filtrar localmente
       this.getProjectsByUserId(userId);
     }
   }
@@ -144,17 +130,10 @@ export class ProjectsComponent {
   getAllProjects(filters?: any): void {
     this.isLoading = true;
     
-    // Si hay filtros, construye los parámetros de consulta
-    let params = {};
-    if (filters) {
-      params = { ...filters };
-    }
-
     this.projectService.getAllProjects().subscribe({
       next: (response) => {
         let projects = response.proyectos || response.projects || response;
         
-        // Aplicar filtro local si hay nombre en los filtros
         if (filters?.nombre) {
           const searchTerm = filters.nombre.toLowerCase();
           projects = projects.filter((project: any) => 
@@ -163,15 +142,13 @@ export class ProjectsComponent {
         }
         
         this.projectsList = projects;
-        console.log('Listando todos los proyectos', this.projectsList);
         this.dataSource.data = this.projectsList;
         this.dataSource.paginator = this.paginator;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al obtener proyectos:', error);
+        this._snackBar.open('Error al obtener proyectos', 'Cerrar', {duration: 3000});
         this.isLoading = false;
-        this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
       }
     });
   }
@@ -182,7 +159,6 @@ export class ProjectsComponent {
       next: (response) => {
         let projects = response.proyectos || response.projects || response;
         
-        // Aplicar filtro local si hay nombre en los filtros
         if (this.projectDefaultFilterSearch.nombre) {
           const searchTerm = this.projectDefaultFilterSearch.nombre.toLowerCase();
           projects = projects.filter((project: any) => 
@@ -196,9 +172,8 @@ export class ProjectsComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al obtener proyectos del usuario:', error);
+        this._snackBar.open('Error al obtener proyectos del usuario', 'Cerrar', {duration: 3000});
         this.isLoading = false;
-        this._snackBar.open('Error al cargar proyectos', 'Cerrar', {duration: 3000});
       }
     });
   }
@@ -214,13 +189,12 @@ export class ProjectsComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true) { // Verificar explícitamente si hubo cambios
+      if (result === true) {
         this.refreshProjectsList();
       }
     });
   }
 
-  // Nuevo método para refrescar la lista
   refreshProjectsList(): void {
     const userInfo = this.authService.getAuthFromSessionStorage();
     const userId = userInfo.id;
@@ -242,9 +216,9 @@ export class ProjectsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.getAllProjects();
+        this.refreshProjectsList();
       }
-    })
+    });
   }
 
   openModalUpdateProject(projectInformation: any): void {
@@ -258,16 +232,16 @@ export class ProjectsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.getAllProjects();
+        this.refreshProjectsList();
       }
-    })
+    });
   }
 
   deleteProject(projectId: number): void {
     this.projectService.deleteProject(projectId).subscribe({
       next: (response) => {
-        this._snackBar.open(response.message, 'Cerrar', { duration: 5000 });
-        this.getAllProjects();
+        this._snackBar.open(response.message || 'Proyecto eliminado correctamente', 'Cerrar', { duration: 5000 });
+        this.refreshProjectsList();
       },
       error: (error) => {
         const errorMessage = error.error?.message || 'Error al eliminar el proyecto';
@@ -275,5 +249,4 @@ export class ProjectsComponent {
       }
     });
   }
-
 }

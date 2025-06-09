@@ -40,7 +40,7 @@ export class AddUsersModalComponent implements OnInit {
   searchTerm = '';
   allUsers: any[] = [];
   filteredUsers: any[] = [];
-  selectedUsers: any[] = []; // Añade esta línea
+  selectedUsers: any[] = [];
   isLoading = true;
 
   constructor(
@@ -67,7 +67,8 @@ export class AddUsersModalComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.snackBar.open('Error al cargar usuarios', 'Cerrar', { duration: 3000 });
+        this.snackBar.open('Error al cargar usuarios disponibles', 'Cerrar', {duration: 3000});
+        console.error('Error al cargar usuarios:', err);
       }
     });
   }
@@ -80,12 +81,11 @@ export class AddUsersModalComponent implements OnInit {
     
     const term = this.searchTerm.toLowerCase();
     this.filteredUsers = this.allUsers.filter(user => 
-      user.nombre.toLowerCase().includes(term) || 
-      user.email.toLowerCase().includes(term)
+      (user.nombre && user.nombre.toLowerCase().includes(term)) || 
+      (user.email && user.email.toLowerCase().includes(term))
     );
   }
 
-  // Añade estos métodos nuevos
   isUserSelected(user: any): boolean {
     return this.selectedUsers.some(u => u.id === user.id);
   }
@@ -103,8 +103,11 @@ export class AddUsersModalComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  // Actualiza este método
   onAddUsers(): void {
+    if (this.selectedUsers.length === 0) {
+      this.snackBar.open('Debe seleccionar al menos un usuario', 'Cerrar', {duration: 3000});
+      return;
+    }
     this.dialogRef.close(this.selectedUsers);
   }
 }

@@ -6,8 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { AddUsersModalComponent } from '../modal-add-users/modal-add-users.component'; // Asegúrate de crear este componente
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectsService } from 'app/services/projects/projects.service';
+import { AddUsersModalComponent } from '../modal-add-users/modal-add-users.component';
 
 @Component({
   selector: 'app-modal-view-project',
@@ -29,7 +30,8 @@ export class ModalViewProjectComponent {
     public dialogRef: MatDialogRef<ModalViewProjectComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialog: MatDialog,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private snackBar: MatSnackBar
   ) { }
 
   closeDialog(): void {
@@ -40,26 +42,28 @@ export class ModalViewProjectComponent {
     this.projectsService.updateProject(this.data.project.id, this.data.project)
       .subscribe({
         next: (response) => {
-          console.log('Proyecto actualizado correctamente', response);
-          this.dialogRef.close(true); // Emitir true para indicar que hubo cambios
+          this.snackBar.open('Proyecto actualizado correctamente', 'Cerrar', {duration: 3000});
+          this.dialogRef.close(true);
         },
         error: (error) => {
+          this.snackBar.open('Error al actualizar el proyecto', 'Cerrar', {duration: 3000});
           console.error('Error al actualizar el proyecto', error);
         }
       });
   }
 
-  removeUser(userId: string): void {
+  removeUser(userId: number): void {
     const projectId = this.data.project.id;
     this.projectsService.removeUserFromProject({
       project_id: projectId,
       usuario_id: userId
     }).subscribe({
       next: () => {
-        // Solo actualizar la lista local después de confirmar el éxito en el backend
         this.data.project.usuarios = this.data.project.usuarios.filter((user: any) => user.id !== userId);
+        this.snackBar.open('Usuario eliminado del proyecto', 'Cerrar', {duration: 3000});
       },
       error: (error) => {
+        this.snackBar.open('Error al eliminar usuario del proyecto', 'Cerrar', {duration: 3000});
         console.error('Error al eliminar usuario', error);
       }
     });
@@ -69,28 +73,25 @@ export class ModalViewProjectComponent {
     const dialogRef = this.dialog.open(AddUsersModalComponent, {
       width: '600px',
       data: { 
-        currentUsers: this.data.project.usuarios,
-        allUsers: [] // Aquí deberías pasar la lista completa de usuarios disponibles
+        currentUsers: this.data.project.usuarios
       }
     });
 
     dialogRef.afterClosed().subscribe(selectedUsers => {
       if (selectedUsers && selectedUsers.length > 0) {
         const projectId = this.data.project.id;
-        const adminId = this.data.project.administrador_id; // Asumiendo que tienes este campo
-        
         this.projectsService.assingUsersToProject({
           project_id: projectId,
-          usuario_id: selectedUsers.map((user: any) => user.id),
-          administrador_id: [adminId] // O el ID del admin correspondiente
+          usuario_ids: selectedUsers.map((user: any) => user.id)
         }).subscribe({
-          next: (response) => {
-            // Actualizar la lista local con los nuevos usuarios
+          next: () => {
             const currentUserIds = this.data.project.usuarios.map((u: any) => u.id);
             const newUsers = selectedUsers.filter((user: any) => !currentUserIds.includes(user.id));
             this.data.project.usuarios = [...this.data.project.usuarios, ...newUsers];
+            this.snackBar.open('Usuarios agregados correctamente', 'Cerrar', {duration: 3000});
           },
           error: (error) => {
+            this.snackBar.open('Error al agregar usuarios al proyecto', 'Cerrar', {duration: 3000});
             console.error('Error al agregar usuarios', error);
           }
         });
